@@ -1,5 +1,6 @@
 -- This query creates a trigger that decreases the quantity
 -- of an item after adding a new order.
+-- DROP TRIGGER IF EXISTS reduce_quantity;
 DELIMITER $$$
 CREATE TRIGGER `items_change`
 AFTER INSERT ON `orders` FOR EACH ROW
