@@ -17,7 +17,7 @@ def count_calls(method: Callable) -> Callable:
     """
 
     @wraps(method)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> Any:
         """
         This function  increments the count for that key every time the class
         method is called and returns the value returned by the original method.
@@ -27,9 +27,9 @@ def count_calls(method: Callable) -> Callable:
         >> 1
         """
 
-        if isinstance(self._redis, redis.Redis):
-            # calling the decorated method
-            self._redis.incr(method.__qualname__)
+        # if isinstance(self._redis, redis.Redis):
+        #  calling the decorated method
+        self._redis.incr(method.__qualname__)
 
         #  returning the decorated function
         return method(self, *args, **kwargs)
