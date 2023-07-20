@@ -28,7 +28,7 @@ def count_calls(method: Callable) -> Callable:
         """
 
         if isinstance(self._redis, redis.Redis):
-            #  calling the decorated method
+            # calling the decorated method
             self._redis.incr(method.__qualname__)
 
         #  returning the decorated function
