@@ -28,7 +28,11 @@ class Cache:
         self._redis.mset({key: data})
         return key
 
-    def get(self, key: str, fn: Callable) -> Union[str, bytes, int, float]:
+    def get(
+            self,
+            key: str,
+            fn: Callable = None
+            ) -> Union[str, bytes, int, float]:
         """
         This method take a key string argument and an optional Callable
         This callable will be used to convert the data back to
