@@ -6,6 +6,34 @@ operation as regards to Redis.
 import redis
 from uuid import uuid4
 from typing import Union, Callable, Any
+from functools import wraps
+
+
+# A decorator
+def count_calls(method: Callable) -> Callable:
+    """
+    This decorator tracks the number of calls made by method in the cache
+    (takes a single method Callable argument and returns a Callable)
+    """
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """
+        This function  increments the count for that key every time the class
+        method is called and returns the value returned by the original method.
+        e.g
+        cache.store(b"first")
+        print(cache.get(cache.store.__qualname__))
+        >> 1
+        """
+
+        # if isinstance(self._redis, redis.Redis):
+        #  calling the decorated method
+        self._redis.incr(method.__qualname__)
+
+        #  returning the decorated function
+        return method(self, *args, **kwargs)
+    return wrapper
 
 
 class Cache:
@@ -19,6 +47,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         This method takes a data argument, store it with a unique id
