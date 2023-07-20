@@ -9,13 +9,11 @@ from typing import Union, Callable, Any
 from functools import wraps
 
 
-
 def count_calls(method: Callable) -> Callable:
     """
     This decorator tracks the number of calls made by method in the cache
     (takes a single method Callable argument and returns a Callable)
     """
-
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """
@@ -36,6 +34,23 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    """ Append input and output when a function is called. """
+    _key = method.__qualname__
+    _input = _key + ":inputs"
+    _output = _key + ':outputs'
+
+    @wraps(method)
+    def wrapper(self, *args, **kargs):
+        """ The function that decorates the method."""
+        self._redis.rpush(_input, str(args))
+        result = method(self, *args, *kargs)
+        self._redis.rpush(_output, result)
+
+        return result
+    return wrapper
+
+
 class Cache:
     """ The cache class that acts as a middle man. """
 
@@ -47,6 +62,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
