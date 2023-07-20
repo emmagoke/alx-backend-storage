@@ -32,7 +32,7 @@ class Cache:
             self,
             key: str,
             fn: Callable = None
-            ) -> Any:
+            ) -> Any:  # or Union[str, bytes, int, float]
         """
         This method take a key string argument and an optional Callable
         This callable will be used to convert the data back to
