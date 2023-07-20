@@ -14,6 +14,7 @@ def count_calls(method: Callable) -> Callable:
     This decorator tracks the number of calls made by method in the cache
     (takes a single method Callable argument and returns a Callable)
     """
+    key = method.__qualname__
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """
@@ -27,7 +28,7 @@ def count_calls(method: Callable) -> Callable:
 
         # if isinstance(self._redis, redis.Redis):
         #  calling the decorated method
-        self._redis.incr(method.__qualname__)
+        self._redis.incr(key)
 
         #  returning the decorated function
         return method(self, *args, **kwargs)
