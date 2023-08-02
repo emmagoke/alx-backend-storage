@@ -65,7 +65,7 @@ def replay(func: Callable) -> None:
     method_name = func.__qualname__
     print(f"{method_name} was called {count} times:")
     for key, value in zip(input_list, output_list):
-        print(f"{method_name}(*{key.decode()}) -> {value.decode()}")
+        print(f"{method_name}(*{key.decode('utf-8')}) -> {value}")
 
 
 class Cache:
