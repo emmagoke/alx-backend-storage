@@ -57,19 +57,25 @@ def replay(func: Callable) -> None:
     """
     This function display the history of calls of a particular function.
     """
-    if func is None or not hasattr(func, '__self__'):
-        return
-    _redis = getattr(func.__self__, '_redis', None)
+    # if func is None or not hasattr(func, '__self__'):
+    #     return
+    # _redis = getattr(func.__self__, '_redis', None)
+
+    # if not isinstance(_redis, redis.Redis):
+    #     return
+    method_name = func.__qualname__
+    _redis = func.__self__._redis
+    _intput = method_name + ':inputs'
+    _output = method_name + ':outputs'
 
     count = int(_redis.get(func.__qualname__))
-    input_list = _redis.lrange(func.__qualname__ + ':inputs', 0, -1)
-    output_list = _redis.lrange(func.__qualname__ + ':outputs', 0, -1)
-    output = ""
-    method_name = func.__qualname__
+    input_list = _redis.lrange(_intput, 0, -1)
+    output_list = _redis.lrange(_output, 0, -1)
 
     print("{} was called {} times:".format(method_name, count))
     for key, value in zip(input_list, output_list):
-        print("{}(*{}) -> {}".format(method_name, key.decode('utf-8'), value))
+        print("{}(*{}) -> {}".format(
+            method_name, key.decode('utf-8'), value.decode('utf-8')))
 
 
 class Cache:
