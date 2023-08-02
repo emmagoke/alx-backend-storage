@@ -38,18 +38,34 @@ def count_calls(method: Callable) -> Callable:
 def call_history(method: Callable) -> Callable:
     """ Append input and output when a function is called. """
     _key = method.__qualname__
-    _input = _key + ":inputs"
-    _output = _key + ':outputs'
+    _input_list = _key + ":inputs"
+    _output_list = _key + ':outputs'
 
     @wraps(method)
     def wrapper(self, *args, **kargs):
-        """ The function that decorates the method."""
-        self._redis.rpush(_input, str(args))
+        """ The function append the input and output of the decorated
+         to the end of the list."""
+        self._redis.lpush(_input_list, str(args))
         result = method(self, *args, *kargs)
-        self._redis.rpush(_output, result)
+        self._redis.lpush(_output_list, result)
 
         return result
     return wrapper
+
+
+def replay(func: Callable) -> None:
+    """
+    This function display the history of calls of a particular function.
+    """
+    _redis = redis.Redis()
+    count = int(_redis.get(func.__qualname__))
+    input_list = _redis.lrange(func.__qualname__ + ':inputs', 0, -1)
+    output_list = _redis.lrange(func.__qualname__ + ':outputs', 0, -1)
+    output = ""
+    method_name = func.__qualname__
+    print(f"{method_name} was called {count} times:")
+    for key, value in zip(input_list, output_list):
+        print(f"{method_name}(*'{key.decode()}') -> {value.decode()}")
 
 
 class Cache:
