@@ -63,9 +63,10 @@ def replay(func: Callable) -> None:
     output_list = _redis.lrange(func.__qualname__ + ':outputs', 0, -1)
     output = ""
     method_name = func.__qualname__
-    print(f"{method_name} was called {count} times:")
+
+    print("{} was called {} times:".format(method_name, count))
     for key, value in zip(input_list, output_list):
-        print(f"{method_name}(*{key.decode('utf-8')}) -> {value}")
+        print("{}(*{}) -> {}".format(method_name, key.decode('utf-8'), value))
 
 
 class Cache:
