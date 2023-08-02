@@ -57,7 +57,10 @@ def replay(func: Callable) -> None:
     """
     This function display the history of calls of a particular function.
     """
-    _redis = redis.Redis()
+    if func is None or not hasattr(func, '__self__'):
+        return
+    _redis = getattr(func.__self__, '_redis', None)
+
     count = int(_redis.get(func.__qualname__))
     input_list = _redis.lrange(func.__qualname__ + ':inputs', 0, -1)
     output_list = _redis.lrange(func.__qualname__ + ':outputs', 0, -1)
