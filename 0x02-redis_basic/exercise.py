@@ -38,16 +38,21 @@ def count_calls(method: Callable) -> Callable:
 def call_history(method: Callable) -> Callable:
     """ Append input and output when a function is called. """
     _key = method.__qualname__
-    _input_list = _key + ":inputs"
-    _output_list = _key + ':outputs'
+    _input_key = _key + ":inputs"
+    _output_key = _key + ':outputs'
 
     @wraps(method)
-    def wrapper(self, *args, **kargs):
+    def wrapper(self, *args, **kwargs):
         """ The function append the input and output of the decorated
          to the end of the list."""
-        self._redis.lpush(_input_list, str(args))
-        result = method(self, *args, *kargs)
-        self._redis.lpush(_output_list, result)
+        # Store the string representation of input arguments using RPUSH
+        self._redis.rpush(_input_key, str(args))
+
+        # Execute the original method to get the output
+        result = method(self, *args, **kwargs)
+
+        # Store the output using RPUSH
+        self._redis.rpush(_output_key, result)
 
         return result
     return wrapper
@@ -97,7 +102,7 @@ class Cache:
         and returns a string
         """
         key = str(uuid4())
-        self._redis.mset({key: data})
+        self._redis.set({key: data})
         return key
 
     def get(
